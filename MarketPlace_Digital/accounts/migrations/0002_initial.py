@@ -22,6 +22,11 @@ class Migration(migrations.Migration):
             field=models.ManyToManyField(blank=True, to='marketplace.productos'),
         ),
         migrations.AddField(
+            model_name='userlibrary',
+            name='user',
+            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='library', to=settings.AUTH_USER_MODEL),
+        ),
+        migrations.AddField(
             model_name='user',
             name='groups',
             field=models.ManyToManyField(blank=True, help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.', related_name='user_set', related_query_name='user', to='auth.group', verbose_name='groups'),

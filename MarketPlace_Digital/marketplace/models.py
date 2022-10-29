@@ -32,6 +32,11 @@ class Product(models.Model):
     content_file = models.FileField(blank=True, null=True)
     active = models.BooleanField(default=False)
 
+    content_url = models.URLField(blank=True, null=True)
+   
+    content_file = models.FileField(blank=True, null=True)
+    active = models.BooleanField(default=False)
+
     # cents Cant be lower than 50 cents@!
     price = models.PositiveIntegerField(default=100)
 

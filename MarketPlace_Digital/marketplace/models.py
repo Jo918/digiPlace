@@ -32,11 +32,6 @@ class Product(models.Model):
     content_file = models.FileField(blank=True, null=True)
     active = models.BooleanField(default=False)
 
-    content_url = models.URLField(blank=True, null=True)
-   
-    content_file = models.FileField(blank=True, null=True)
-    active = models.BooleanField(default=False)
-
     # cents Cant be lower than 50 cents@!
     price = models.PositiveIntegerField(default=100)
 
@@ -49,6 +44,11 @@ class Product(models.Model):
 
 class PurchasedProduct(models.Model):
     email = models.EmailField()
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    date_purchased = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.email
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     date_purchased = models.DateTimeField(auto_now_add=True)
 

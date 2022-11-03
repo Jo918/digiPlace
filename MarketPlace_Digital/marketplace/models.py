@@ -49,8 +49,3 @@ class PurchasedProduct(models.Model):
 
     def __str__(self):
         return self.email
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    date_purchased = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.email

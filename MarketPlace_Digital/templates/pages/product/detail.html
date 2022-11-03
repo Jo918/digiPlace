@@ -22,21 +22,22 @@
     </div>
 </div>
 <!-- This example requires Tailwind CSS v2.0+ -->
-<div >
-  <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8 lg:flex lg:items-center lg:justify-between">
-    <h2 class="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+<div class="bg-gray-50">
+  <div class="mx-auto max-w-7xl py-12 px-4 sm:px-6 lg:flex lg:items-center lg:justify-between lg:py-16 lg:px-8">
+    <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
       <span class="block">Ready to dive in?</span>
-      <span class="block text-indigo-600">compra ahora</span>
+      <span class="block text-indigo-600">Start your free trial today.</span>
     </h2>
     <div class="mt-8 flex lg:mt-0 lg:flex-shrink-0">
       <div class="inline-flex rounded-md shadow">
-        <a href="#" class="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
-          Buy Now
-        </a>
+        <button type="submit" id="checkout-button" class="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-5 py-3 text-base font-medium text-white hover:bg-indigo-700">Buy</button>
       </div>
+      
     </div>
   </div>
 </div>
+{% csrf_token %}
+{% comment %} {{STRIPE_PUBLIC_KEY}} {% endcomment %}
 
 {% endblock content %}
 
@@ -46,10 +47,47 @@
 
 
 {% block javascript %}
+<script type="text/javascript">
 
-{% endblock javascript %}
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
+    // Create and instance of the stripe object with your publishable API key
+    var stripe = Stripe('{{ STRIPE_PUBLIC_KEY }}');
 
-{% block javascript %}
+    var checkoutButton = document.getElementById('checkout-button');
 
+    checkoutButton.addEventListener('click', function() {
+        //Create a new Checkout session using the server-side endpoint yout
+        //create in step 3
+
+        fetch("{% url 'create-checkout-session' product.slug %}", {
+            method: 'POST',
+            headers:{
+              "Content-Type": "application/json",
+              'X-CSRFToken': csrftoken
+            }
+            
+        })
+        .then(function(response){
+            return response.json();
+        })
+        .then(function(session){
+            console.log(session)
+            return stripe.redirectToCheckout({ sessionId: session.id });
+        })
+        .then(function(result){
+            // If 'redirectToCheckout' fails due to a browser or network
+            // error, you should display the localized error message to your
+            // customer using 'error.message'
+            if (result.error) {
+                alert(result.error.message);
+            }
+        })
+        .catch(function(error){
+            console.error('Error', error);
+        });
+    });
+</script>
+  
+</script>
 {% endblock javascript %}

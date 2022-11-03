@@ -5,7 +5,24 @@ from django.core.paginator import Paginator
 from marketplace.models import Product
 from marketplace.forms import ProductModelForm
 from django.urls import reverse
+from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic.base import TemplateView
+from django.http.response import HttpResponse, JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from accounts.models import UserLibrary
+
+from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
+from stripe.error import SignatureVerificationError
+from django.core.mail import send_mail
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+import stripe
+#stripe.api_key = 'sk_test_51LxVZZJK3Xy2o1pPwruV8q7HEcnrMT5OOClNiXVceDeXLclXXaRfIrQYKBBYHUIv1nYHG45n7praRoEjlwwWLQY1004UScBqcp'
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
 
 class HomeView(View):
     def get(self, request, *args, **kwargs):
@@ -86,6 +103,123 @@ class ProductDetailView(View):
     def get(self, request, slug, *args, **kwargs):
         product = get_object_or_404(Product, slug=slug)
         context = {
-            'product': product
+            'product': product,
         }
+        context.update({
+           'STRIPE_PUBLIC_KEY': settings.STRIPE_PUBLIC_KEY,
+            #"has_access": has_access
+        })
         return render(request, 'pages/product/detail.html', context)
+
+
+class CreateCheckoutSessionView(View):
+    def post(self, request, *args, **kwargs):
+        product = Product.objects.get(slug=self.kwargs["slug"])
+
+        domain = "https://vudera.com"
+        if settings.DEBUG:
+            domain = "http://127.0.0.1:8000"
+
+        customer = None
+        customer_email = None
+
+        if request.user.is_authenticated:
+            if request.user.stripe_customer_id:
+                customer = request.user.stripe_customer_id
+            else:
+                customer_email = request.user.email
+
+        session = stripe.checkout.Session.create(
+            customer=customer,
+            customer_email=customer_email,
+
+            payment_method_types=['card'],
+            line_items=[{
+                'price_data': {
+                    'currency': 'usd',
+                    'product_data': {
+                        'name': product.name,
+                    },
+                    'unit_amount': product.price,
+                },
+                'quantity': 1,
+            }],
+            mode='payment',
+            success_url=domain + reverse("success"),
+            cancel_url=domain + reverse("home"),
+            metadata={
+                "product_id": product.id
+            }
+        )
+
+        return JsonResponse({
+            "id": session.id
+        })
+
+class successView(TemplateView):
+    template_name = 'pages/product/success.html'
+
+
+@csrf_exempt
+def stripe_webhook(request, *args, **kwargs):
+    CHECKOUT_SESSION_COMPLETED = "checkout.session.completed"
+    payload = request.body
+    sig_header = request.META["HTTP_STRIPE_SIGNATURE"]
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload,
+            sig_header,
+            settings.STRIPE_WEBHOOK_SECRET
+        )
+    except ValueError as e:
+        print(e)
+        return HttpResponse(status=400)
+
+    except SignatureVerificationError as e:
+        print(e)
+        return HttpResponse(status=400)
+
+    # escuchar por pago exitoso
+    if event["type"] == CHECKOUT_SESSION_COMPLETED:
+        print(event)
+
+        # quien pago por que cosa?
+        product_id = event["data"]["object"]["metadata"]["product_id"]
+        product = Product.objects.get(id=product_id)
+
+        stripe_customer_id = event["data"]["object"]["customer"]
+
+        # dar acceso al producto
+        try:
+            #revisar si el usuario ya tiene un customer ID
+            user = User.objects.get(stripe_customer_id=stripe_customer_id)
+
+            user.library.products.add(product)
+            user.library.save()
+
+        except User.DoesNotExist:
+            #si el usuario no tiene customer ID, pero este si esta registrado en el sitio web
+            stripe_customer_email = event["data"]["object"]["customer_details"]["email"]
+            try:
+                user = User.objects.get(email=stripe_customer_email)
+                user.stripe_customer_id = stripe_customer_id
+                user.library.products.add(product)
+                user.library.save()
+
+            except User.DoesNotExist:
+                PurchasedProduct.objects.create(
+                    email=stripe_customer_email,
+                    product=product
+                )
+
+                send_mail(
+                    subject="Create an account to access your content",
+                    message="Please signup to access your products",
+                    recipient_list=[stripe_customer_email],
+                    from_email="Vudera <mail@vudera.com>"
+                )
+
+                pass
+
+    return HttpResponse()

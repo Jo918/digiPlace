@@ -1,3 +1,4 @@
 from django.test import TestCase
 
-# Create your tests here.
+def __str__(self):
+    return self.email

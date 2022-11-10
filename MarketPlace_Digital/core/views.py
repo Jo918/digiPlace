@@ -78,6 +78,16 @@ class HomeView(View):
         }
         return render(request, 'pages/index.html', context)
 
+
+class UserProductListView(View):
+    def get(self, request, *args, **kwargs):
+        products = Product.objects.filter(user=self.request.user)
+        context={
+            'products': products
+        }
+        return render(request, 'pages/product/user_productlist.html', context)
+
+
 class ProductUpdate(LoginRequiredMixin,UpdateView):
     template_name="pages/product/edit.html"
     form_class= ProductModelForm
@@ -134,6 +144,12 @@ class CreateCheckoutSessionView(View):
                 },
                 'quantity': 1,
             }],
+            mode='payment',
+            success_url=domain + reverse("success"),
+            cancel_url=domain + reverse("home"),
+            metadata={
+                "product_id": product.id
+            }
         )
 
         return JsonResponse({

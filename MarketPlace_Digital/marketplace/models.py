@@ -35,16 +35,17 @@ class Product(models.Model):
     # cents Cant be lower than 50 cents@!
     price = models.PositiveIntegerField(default=100)
 
+    def __str__(self):
+        return self.name
+
+    def price_display(self):
+        return "{0:.2f}".format(self.price / 100)
+
 
 class PurchasedProduct(models.Model):
     email = models.EmailField()
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     date_purchased = models.DateTimeField(auto_now_add=True)
 
-    user = models.ForeignKey(
-            User, on_delete=models.CASCADE, related_name="products")
-    name = models.CharField(max_length=100)
-    description = models.TextField()
-    thumbnail = models.ImageField(
-        blank=True, null=True, upload_to=marketplace_directory_path)
-    slug = models.SlugField(unique=True)
+    def __str__(self):
+        return self.email

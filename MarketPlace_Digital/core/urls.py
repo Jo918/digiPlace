@@ -4,7 +4,7 @@ from django.urls import path
 from django.conf.urls.static import static
 from django.conf import settings
 from django.urls.conf import include
-from .views import HomeView, successView, stripe_webhook, UserProductListView, ProductUpdate, ProductDetailView, CreateCheckoutSessionView
+from .views import HomeView, UserLibraryView, successView, stripe_webhook, UserProductListView, ProductUpdate, ProductDetailView, CreateCheckoutSessionView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -17,6 +17,7 @@ urlpatterns = [
     
     path('success/', successView.as_view(), name="success"),
     path("webhooks/stripe/", stripe_webhook, name="stripe-webhook"),
+    path("library/<username>/", UserLibraryView.as_view(), name="library"),
     
     path('', HomeView.as_view(), name="home" ),
     path('products/', UserProductListView.as_view(), name="product-list"),

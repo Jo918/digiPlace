@@ -43,7 +43,7 @@
               <!-- Active: "bg-gray-100 text-gray-900", Not Active: "text-gray-700" -->
               <a href="#" class="text-gray-700 block px-4 py-2 text-sm" role="menuitem" tabindex="-1"
                 id="menu-item-0">Profile</a>
-              <a href="#" class="text-gray-700 block px-4 py-2 text-sm" role="menuitem" tabindex="-1"
+              <a href="{% url 'library' user.username %}" class="text-gray-700 block px-4 py-2 text-sm" role="menuitem" tabindex="-1"
                 id="menu-item-1">Library</a>
               <a href="#" class="text-gray-700 block px-4 py-2 text-sm" role="menuitem" tabindex="-1"
                 id="menu-item-2">Settings</a>

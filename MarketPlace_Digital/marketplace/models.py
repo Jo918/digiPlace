@@ -35,6 +35,12 @@ class Product(models.Model):
     # cents Cant be lower than 50 cents@!
     price = models.PositiveIntegerField(default=100)
 
+    def __str__(self):
+        return self.name
+
+    def price_display(self):
+        return "{0:.2f}".format(self.price / 100)
+
 
 class PurchasedProduct(models.Model):
     email = models.EmailField()
@@ -48,4 +54,6 @@ class PurchasedProduct(models.Model):
     thumbnail = models.ImageField(
         blank=True, null=True, upload_to=marketplace_directory_path)
     slug = models.SlugField(unique=True)
+
+    def __str__(self):
         return self.email

@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
-from django.views.generic.edit import UpdateView
+from django.views.generic.edit import UpdateView, DeleteView
 from django.core.paginator import Paginator
 from marketplace.models import Product
 from marketplace.forms import ProductModelForm
+
 from django.urls import reverse
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -86,6 +87,27 @@ class UserProductListView(View):
             'products': products
         }
         return render(request, 'pages/product/user_productlist.html', context)
+    
+
+class UserLibraryView(LoginRequiredMixin, View):
+    def get(self, request, username, *args, **kwargs):
+        user = get_object_or_404(User, username=username)
+        userlibrary = UserLibrary.objects.get(user=user)
+        context = {
+            'userlibrary': userlibrary
+        }
+        return render(request, 'pages/product/library.html', context)
+
+
+class ProducDeleteView(LoginRequiredMixin, DeleteView):
+    model = Product
+    template_name = "pages/product/product_confirm_delete.html"
+
+    def get_success_url(self):
+        return reverse("product-list")
+
+    
+
 
 
 class ProductUpdate(LoginRequiredMixin,UpdateView):
@@ -99,15 +121,24 @@ class ProductUpdate(LoginRequiredMixin,UpdateView):
         return reverse("product-list")
 
 
+
 class ProductDetailView(View):
     def get(self, request, slug, *args, **kwargs):
         product = get_object_or_404(Product, slug=slug)
+
+        has_access = None
+
+        if self.request.user.is_authenticated:
+            if product in self.request.user.library.products.all():
+                has_access = True
+
         context = {
             'product': product,
+
         }
         context.update({
-           'STRIPE_PUBLIC_KEY': settings.STRIPE_PUBLIC_KEY,
-            #"has_access": has_access
+            'STRIPE_PUBLIC_KEY': settings.STRIPE_PUBLIC_KEY,
+            "has_access": has_access
         })
         return render(request, 'pages/product/detail.html', context)
 

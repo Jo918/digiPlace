@@ -6,36 +6,48 @@
 {% endblock navbar %}
 
 {% block content %}
-<div class="relative px-4 sm:px-6 lg:px-8">
-    <div class="text-lg max-w-prose mx-auto">
-      <h1>
-        <span class="block text-base text-center text-indigo-600 font-semibold tracking-wide uppercase">Category</span>
-        <span class="mt-2 block text-3xl text-center leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">{{product.name}}</span>
-      </h1>
-        <img class="w-full rounded-lg" src="{{product.thumbnail.url}}" alt="" width="1310" height="873">
-        
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-auto mt-5">
+      <div class="relative px-4 sm:px-6 lg:px-8">
+        <div class="text-lg max-w-prose mx-auto">
+          <h1>
+            <span
+              class="mt-2 block text-3xl text-center leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">{{product.name}}</span>
+          </h1>
+          <br>
+          <img class="w-full rounded-lg" src="{{product.thumbnail.url}}" alt="" width="1310" height="873">
+          <br>
       
-      <p class="mt-8 text-xl text-gray-500 leading-8">{{product.description}}</p>
-    </div>
-    <div class="mt-6 prose prose-indigo prose-lg text-gray-500 mx-auto">
-    <p>$ {{product.price_display}}</p>
-    </div>
-</div>
-<!-- This example requires Tailwind CSS v2.0+ -->
-<div class="bg-gray-50">
-  <div class="mx-auto max-w-7xl py-12 px-4 sm:px-6 lg:flex lg:items-center lg:justify-between lg:py-16 lg:px-8">
-    <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-      <span class="block">Ready to dive in?</span>
-      <span class="block text-indigo-600">Start your free trial today.</span>
-    </h2>
-    <div class="mt-8 flex lg:mt-0 lg:flex-shrink-0">
-      <div class="inline-flex rounded-md shadow">
-        <button type="submit" id="checkout-button" class="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-5 py-3 text-base font-medium text-white hover:bg-indigo-700">Buy</button>
+          <p class="mt-8 text-xl text-gray-500 leading-8">{{product.description}}</p>
+        </div>
+        <div class="mt-6 prose prose-indigo prose-lg text-gray-500 mx-auto">
+          <p>$ {{product.price_display}}</p>
+        </div>
       </div>
-      
     </div>
   </div>
 </div>
+
+
+
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-auto mt-5">
+      <div>
+        {% if has_access %}
+        <a href="{{ product.content_url }}" target="_blank" class="btn btn-primary btn-lg" tabindex="-1" role="button" aria-disabled="true">Access URL</a>
+        <a href="{{ product.content_file.url }}" download class="btn btn-primary btn-lg" tabindex="-1" role="button" aria-disabled="true">Download</a>
+        {% else %}
+        <button type="submit" id="checkout-button" class="btn btn-primary btn-lg">Comprar</button>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<br>
+
 {% csrf_token %}
 {% comment %} {{STRIPE_PUBLIC_KEY}} {% endcomment %}
 
@@ -49,45 +61,45 @@
 {% block javascript %}
 <script type="text/javascript">
 
-    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+  const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-    // Create and instance of the stripe object with your publishable API key
-    var stripe = Stripe('{{ STRIPE_PUBLIC_KEY }}');
+  // Create and instance of the stripe object with your publishable API key
+  var stripe = Stripe('{{ STRIPE_PUBLIC_KEY }}');
 
-    var checkoutButton = document.getElementById('checkout-button');
+  var checkoutButton = document.getElementById('checkout-button');
 
-    checkoutButton.addEventListener('click', function() {
-        //Create a new Checkout session using the server-side endpoint yout
-        //create in step 3
+  checkoutButton.addEventListener('click', function () {
+    //Create a new Checkout session using the server-side endpoint yout
+    //create in step 3
 
-        fetch("{% url 'create-checkout-session' product.slug %}", {
-            method: 'POST',
-            headers:{
-              "Content-Type": "application/json",
-              'X-CSRFToken': csrftoken
-            }
-            
-        })
-        .then(function(response){
-            return response.json();
-        })
-        .then(function(session){
-            console.log(session)
-            return stripe.redirectToCheckout({ sessionId: session.id });
-        })
-        .then(function(result){
-            // If 'redirectToCheckout' fails due to a browser or network
-            // error, you should display the localized error message to your
-            // customer using 'error.message'
-            if (result.error) {
-                alert(result.error.message);
-            }
-        })
-        .catch(function(error){
-            console.error('Error', error);
-        });
-    });
+    fetch("{% url 'create-checkout-session' product.slug %}", {
+      method: 'POST',
+      headers: {
+        "Content-Type": "application/json",
+        'X-CSRFToken': csrftoken
+      }
+
+    })
+      .then(function (response) {
+        return response.json();
+      })
+      .then(function (session) {
+        console.log(session)
+        return stripe.redirectToCheckout({ sessionId: session.id });
+      })
+      .then(function (result) {
+        // If 'redirectToCheckout' fails due to a browser or network
+        // error, you should display the localized error message to your
+        // customer using 'error.message'
+        if (result.error) {
+          alert(result.error.message);
+        }
+      })
+      .catch(function (error) {
+        console.error('Error', error);
+      });
+  });
 </script>
-  
+
 </script>
 {% endblock javascript %}

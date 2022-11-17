@@ -6,7 +6,23 @@
 {% endblock navbar %}
 
 {% block content %}
-Successfull purchase
+
+<div class="m-0 row justify-content-center ">
+    <div class="col-auto p-5 text-center">
+        <div class="alert alert-success" role="alert">
+        Successfull purchase
+        </div>
+    </div>
+</div>
+<div class="m-0 row justify-content-center ">
+    <div class="col-auto p-5 text-center">
+        <a href="{% url 'home' %}">
+            <button type="button" class="btn btn-success">Home</button>
+        </a>
+    </div>
+</div>
+
+
 {% endblock content %}
 
 {% block footer %}

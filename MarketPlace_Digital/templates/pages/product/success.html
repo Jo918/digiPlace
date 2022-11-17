@@ -6,24 +6,25 @@
 {% endblock navbar %}
 
 {% block content %}
-Successfull purchase
+
+<div class="m-0 row justify-content-center ">
+    <div class="col-auto p-5 text-center">
+        <div class="alert alert-success" role="alert">
+        Successfull purchase
+        </div>
+    </div>
+</div>
+<div class="m-0 row justify-content-center ">
+    <div class="col-auto p-5 text-center">
+        <a href="{% url 'home' %}">
+            <button type="button" class="btn btn-success">Home</button>
+        </a>
+    </div>
+</div>
+
+
 {% endblock content %}
-<div
-class="absolute inset-0 flex items-center"
-aria-hidden="true"
->
-<div
-class="w-full border-t dark:border-dark-second border-gray-300"
-></div>
-</div>
-<div class="relative flex justify-center my-4">
-<span
-class="px-2 bg-white dark:bg-dark-second text-sm dark:text-dark-txt text-gray-500"
->
-Product Details
-</span>
-</div>
-</div>
+
 {% block footer %}
 
 {% endblock footer %}

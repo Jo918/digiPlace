@@ -5,85 +5,63 @@
 {% include 'components/nabvar.html' %}
 {% endblock navbar %}
 
+
+
 {% block content %}
-<!-- This example requires Tailwind CSS v2.0+ -->
-<div class="flex flex-col">
-  <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-    <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
-      <div class="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
-            <tr>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Imagen
-              </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Nombre
-              </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Precio
-              </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Estado
-              </th>
-              <th scope="col" class="relative px-6 py-3">
-                <span class="sr-only">Edit</span>
-              </th>
-            </tr>
-          </thead>
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-auto mt-5">
+      <table class="table table-striped table-hover table-bordered border-dark">
+        <thead>
+          <tr>
+            <th scope="col">Imagen</th>
+            <th scope="col">Nombre</th>
+            <th scope="col">Precio</th>
+            <th scope="col">Estado</th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
 
-          <label for="photo" class="block text-sm font-medium dark:text-dark-txt text-gray-700">
-            Publish or Draft?
-            </label>
-            {{form.active}}
-
-            <span class=" text-red-500">{{form.errors}}</span>
-
-          <tbody class="bg-white divide-y divide-gray-200">
-            {% for product in products %}
-            <tr>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                {% if product.thumbnail %}
-                <div class="flex-shrink-0">
-                    <a href="{% url 'product-detail' product.slug %}">
-                    <img class="h-48 w-full object-cover" src="{{ product.thumbnail.url }}" alt="{{product.name}}">
-                    </a>
-                </div>
-                {% endif %}
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {{product.name}}
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                $ {{product.price_display}}
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {% if product.active %}
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                Published
-                </span>
-                {% elif not product.active %}
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                Draft
-                </span>
-                {% endif %}
-                
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <a href="{% url 'product-update' product.slug %}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
-              </td>
-            </tr>
-            {% endfor %}
+        <tbody>
+          {% for product in products %}
+          <tr>
+            <td>
+              {% if product.thumbnail %}
+              
+                <a href="{% url 'product-detail' product.slug %}">
+                  <img class="h-48 w-full object-cover" src="{{ product.thumbnail.url }}" alt="{{product.name}}">
+                </a>
+              
+              {% endif %}
+            </td>
+            <td>
+              {{product.name}}
+            </td>
+            <td>$ {{product.price_display}}</td>
+            <td>
+              {% if product.active %}
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                Activo
+              </span>
+              {% elif not product.active %}
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                Inactivo
+              </span>
+              {% endif %}
+            </td>
+            <td>
+              <a href="{% url 'product-update' product.slug %}"><i class="fa-regular fa-pen-to-square"></i></a>
+              
+              <a href="{% url 'product-delete' product.slug %}"><i class="fa-solid fa-trash"></i></a>
+            </td>
             
-
-            <!-- More people... -->
-          </tbody>
-        </table>
-      </div>
+          </tr>
+        </tbody>
+        {% endfor %}
+      </table>
     </div>
   </div>
 </div>
-
 {% endblock content %}
 
 
